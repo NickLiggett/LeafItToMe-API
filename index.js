@@ -6,64 +6,67 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 4000;
 
-app.get("/customers", (request, response) => {
-  response.status(200).json({ customers: customers });
+app.get("/customers", (req, res) => {
+  res.json(customers);
 });
 
-app.get("/customers/:id", (request, response) => {
-  const singleUser = customers.find(
-    (customer) => customer.id === parseInt(request.params.id)
+app.get("/customers/:id", (req, res) => {
+  const customer = customers.find((c) => c.id === parseInt(req.params.id));
+  if (!customer)
+    res.status(404).send("The customer with the given ID was not found.");
+  res.send(customer);
+});
+
+app.post("/customers/:id/plants", (req, res) => {
+  const id = req.params.id;
+  const customerIndex = customers.findIndex(
+    (customer) => customer.id === parseInt(id)
   );
-  response.status(200).json({ customer: singleUser });
-});
 
-app.post("/customers/add", (request, response) => {
-  const newCustomer = {
-    id: request.body.id,
-    first_name: request.body.first_name,
-    last_name: request.body.last_name,
-    username: request.body.username,
-    password: request.body.password,
-    city: request.body.city,
-    state: request.body.state,
-    zip_code: request.body.zip_code,
-    user_img: request.body.user_img,
-    plants: [],
-  };
-  customers.push(newCustomer);
-  response.status(200).json({ customers: customers });
-});
+  if (customerIndex === -1) {
+    return res.status(404).json({ message: "Customer not found" });
+  }
 
-app.post("/customer/addPlant/:id", (request, response) => {
   const newPlant = {
-    plant_id: request.body.plant_id,
-    species: request.body.species,
-    img: request.body.img,
-    instructions: request.body.instructions,
+    id: customers[customerIndex].plants.length + 1,
+    species: req.body.species,
+    img: req.body.img,
+    instructions: req.body.instructions,
   };
-  const theCustomer = customers.find(
-    (customer) => customer.id === parseInt(request.params.id)
-  );
-  theCustomer.plants.push(newPlant);
-  response.status(200).json({ plants: theCustomer.plants });
+
+  customers[customerIndex].plants.push(newPlant);
+  res.json(customers[customerIndex].plants);
 });
 
-app.delete("/:id", (request, response) => {
-  const filteredCustomers = customers.filter(
-    (customer) => customer.id !== parseInt(request.params.id)
-  );
-  response.status(200).json({ customers: filteredCustomers });
+app.patch("/customers/:id", (req, res) => {
+  const customer = customers.find((c) => c.id === parseInt(req.params.id));
+  if (!customer)
+    res.status(404).send("The customer with the given ID was not found.");
+
+  const property = req.body.property;
+  const value = req.body.value;
+  customer[property] = value;
+
+  res.send(customer);
 });
 
-app.delete("/customer/:id/plant/:plantID", (request, response) => {
-  const theCustomer = customers.find(
-    (customer) => customer.id === parseInt(request.params.id)
+app.delete("/customers/:customerId/plants/:plantId", (req, res) => {
+  const customerId = req.params.customerId;
+  const plantId = req.params.plantId;
+  let customerIndex = customers.findIndex(
+    (customer) => customer.id == customerId
   );
-  const index = theCustomer.plants.findIndex(
-    (plant) => plant.id === request.params.plantID
+  if (customerIndex === -1) {
+    return res.status(404).send({ message: "Customer not found" });
+  }
+  let plantIndex = customers[customerIndex].plants.findIndex(
+    (plant) => plant.id == plantId
   );
-  theCustomer.plants.splice(index, 1);
-  response.status(200).json({ plants: theCustomer.plants });
+  if (plantIndex === -1) {
+    return res.status(404).send({ message: "Plant not found" });
+  }
+  customers[customerIndex].plants.splice(plantIndex, 1);
+  res.send({ message: "Plant removed successfully" });
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
