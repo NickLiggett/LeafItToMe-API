@@ -1,5 +1,6 @@
 const express = require("express");
-const customers = require("./customers");
+const customers = require("./customers.json");
+const fs = require("fs");
 
 const app = express();
 app.use(express.json());
@@ -18,25 +19,29 @@ app.get("/customers/:id", (req, res) => {
 });
 
 app.post("/customers/:id/plants", (req, res) => {
-  const id = req.params.id;
-  const customerIndex = customers.findIndex(
-    (customer) => customer.id === parseInt(id)
-  );
-
-  if (customerIndex === -1) {
-    return res.status(404).json({ message: "Customer not found" });
-  }
-
+  const customerId = req.params.id;
   const newPlant = {
-    id: customers[customerIndex].plants.length + 1,
+    id: customers[customerId - 1].plants.length + 1,
     species: req.body.species,
     img: req.body.img,
     instructions: req.body.instructions,
   };
 
+  const customerIndex = customers.findIndex(
+    (customer) => customer.id == customerId
+  );
+  if (customerIndex === -1) {
+    return res.status(404).send({ message: "Customer not found" });
+  }
+
   customers[customerIndex].plants.push(newPlant);
-  res.json(customers[customerIndex].plants);
+
+  fs.writeFile("./customers.json", JSON.stringify(customers, null, 2), (err) => {
+    if (err) throw err;
+    res.status(201).send({ message: "Plant added successfully" });
+  });
 });
+
 
 app.patch("/customers/:id", (req, res) => {
   const customer = customers.find((c) => c.id === parseInt(req.params.id));
