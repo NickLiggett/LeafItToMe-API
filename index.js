@@ -18,6 +18,13 @@ app.get("/customers/:id", (req, res) => {
   res.send(customer);
 });
 
+app.get("/customers/:id/plants", (req, res) => {
+  const customer = customers.find((c) => c.id === parseInt(req.params.id));
+  if (!customer)
+    res.status(404).send("Customer not found.");
+  res.send(customer.plants);
+});
+
 app.post("/customers/:id/plants", (req, res) => {
   const customerId = req.params.id;
   const newPlant = {
@@ -36,24 +43,9 @@ app.post("/customers/:id/plants", (req, res) => {
 
   customers[customerIndex].plants.push(newPlant);
 
-  fs.writeFile("./customers.json", JSON.stringify(customers, null, 2), (err) => {
-    if (err) throw err;
-    res.status(201).send({ message: "Plant added successfully" });
-  });
+  res.status(201).send({ plants: customers[customerIndex].plants });
 });
 
-
-app.patch("/customers/:id", (req, res) => {
-  const customer = customers.find((c) => c.id === parseInt(req.params.id));
-  if (!customer)
-    res.status(404).send("The customer with the given ID was not found.");
-
-  const property = req.body.property;
-  const value = req.body.value;
-  customer[property] = value;
-
-  res.send(customer);
-});
 
 app.delete("/customers/:customerId/plants/:plantId", (req, res) => {
   const customerId = req.params.customerId;
