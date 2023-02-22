@@ -2,7 +2,6 @@
   {
     "id": 1,
     "first_name": "Nick",
-    "last_name": "Liggett",
     "username": "Nick",
     "password": "Nick",
     "city": "Littleton",
@@ -27,7 +26,6 @@
   {
     "id": 2,
     "first_name": "Fonda",
-    "last_name": "Coble",
     "username": "Fonda",
     "password": "Fonda",
     "city": "Denver",
