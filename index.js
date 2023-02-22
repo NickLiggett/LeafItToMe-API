@@ -20,8 +20,7 @@ app.get("/customers/:id", (req, res) => {
 
 app.get("/customers/:id/plants", (req, res) => {
   const customer = customers.find((c) => c.id === parseInt(req.params.id));
-  if (!customer)
-    res.status(404).send("Customer not found.");
+  if (!customer) res.status(404).send("Customer not found.");
   res.send(customer.plants);
 });
 
@@ -43,9 +42,14 @@ app.post("/customers/:id/plants", (req, res) => {
 
   customers[customerIndex].plants.push(newPlant);
 
+  const data = JSON.stringify(customers, null, 2)
+
+  fs.writeFileSync("customers.json", data, (err) => {
+    console.log("FILE WRITTEN.")
+  });
+
   res.status(201).send({ plants: customers[customerIndex].plants });
 });
-
 
 app.delete("/customers/:customerId/plants/:plantId", (req, res) => {
   const customerId = req.params.customerId;
@@ -63,7 +67,14 @@ app.delete("/customers/:customerId/plants/:plantId", (req, res) => {
     return res.status(404).send({ message: "Plant not found" });
   }
   customers[customerIndex].plants.splice(plantIndex, 1);
-  res.send({ message: "Plant removed successfully" });
+
+  const data = JSON.stringify(customers, null, 2)
+  
+  fs.writeFileSync("customers.json", data, (err) => {
+    console.log("FILE WRITTEN.")
+  });
+
+  res.send({ message: "Plant removed successfully." });
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
