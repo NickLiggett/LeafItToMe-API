@@ -24,6 +24,22 @@ app.get("/customers/:id/plants", (req, res) => {
   res.send(customer.plants);
 });
 
+app.post('/customers', (req, res) => {
+  const newCustomer = {
+    id: customers.length + 1,
+    first_name: req.body.first_name,
+    username: req.body.username,
+    password: req.body.password,
+    city: req.body.city,
+    state: req.body.state,
+    zip_code: req.body.zip_code,
+    user_img: req.body.user_img,
+    plants: []
+  };
+  customers.push(newCustomer);
+  res.send({new_customer: newCustomer});
+});
+
 app.post("/customers/:id/plants", (req, res) => {
   const customerId = req.params.id;
   const newPlant = {
