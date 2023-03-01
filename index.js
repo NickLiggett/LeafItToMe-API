@@ -1,6 +1,5 @@
 const express = require("express");
 const customers = require("./customers.json");
-const fs = require("fs");
 
 const app = express();
 app.use(express.json());
