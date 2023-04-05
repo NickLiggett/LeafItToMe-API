@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Customer = require("../models/customer");
 
-// Getting All
+// Getting All Customers
 router.get("/", async (req, res) => {
   try {
     const customers = await Customer.find();
@@ -12,12 +12,12 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Getting One
+// Getting One Customer
 router.get("/:id", getCustomer, (req, res) => {
   res.send(res.customer);
 });
 
-// Creating One
+// Creating One Customer
 router.post("/", async (req, res) => {
   const customer = new Customer({
     first_name: req.body.first_name,
@@ -37,7 +37,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Updating One
+// Updating One Customer
 router.patch("/:id", getCustomer, async (req, res) => {
   if (req.body.first_name != null) {
     res.customer.first_name = req.body.first_name;
@@ -71,7 +71,29 @@ router.patch("/:id", getCustomer, async (req, res) => {
   }
 });
 
-// Deleting One
+// Updating One Plant
+router.patch("/:id/plants/:plantID", getCustomer, async (req, res) => {
+  const plantIndex = res.customer.plants.findIndex(plant => plant.id === parseInt(req.params.plantID))
+  
+  if (req.body.species != null) {
+    res.customer.plants[plantIndex].species = req.body.species
+  }
+  if (req.body.instructions != null) {
+    res.customer.plants[plantIndex].instructions = req.body.instructions
+  }
+  if (req.body.image != null) {
+    res.customer.plants[plantIndex].image = req.body.image
+  }
+  try {
+    const updatedCustomer = await res.customer.save();
+    console.log(updatedCustomer)
+    res.json(updatedCustomer.plants[plantIndex]);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+})
+
+// Deleting One Customer
 router.delete("/:id", getCustomer, async (req, res) => {
   try {
     await res.customer.deleteOne();
