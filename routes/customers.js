@@ -86,7 +86,6 @@ router.patch("/:id/plants/:plantID", getCustomer, async (req, res) => {
   }
   try {
     const updatedCustomer = await res.customer.save();
-    console.log(updatedCustomer)
     res.json(updatedCustomer.plants[plantIndex]);
   } catch (err) {
     res.status(400).json({ message: err.message });
